@@ -1,7 +1,7 @@
 -- 🧠 Load Rayfield Library
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Aimbot = loadstring(game:HttpGet("https://raw.githubusercontent.com/Exunys/Aimbot-V3/main/src/Aimbot.lua"))()
-ExunysDeveloperAimbot() 
+
 
 -- ⚙️ Services Roblox
 local Players = game:GetService("Players")
@@ -163,13 +163,6 @@ local function UpdateESP()
     end
 end
 
--- Variable AimBot 
-local AimBotSettings = {
-    Enabled = false,
-    FOV = 100,
-    Smoothness = 5,
-    TargetPart = "Head"
-}
 
 -- 🔁 Boucle d’update
 RunService.RenderStepped:Connect(UpdateESP)
@@ -184,6 +177,17 @@ local Window = Rayfield:CreateWindow({
    Name = "THCrb Script Hub",
    LoadingTitle = "THCrb Script Hub",
    LoadingSubtitle = "by THCrb",
+})
+
+
+-- UI Aimbot
+local AimbotTab = Window:CreateTab("Aimbot", "target")
+AimbotTab:CreateToggle({
+   Name = "Activer Aimbot",
+   CurrentValue = false,
+   Callback = function(Value)
+      Aimbot.Load()
+   end
 })
 
 local ESPTab = Window:CreateTab("ESP", "eye")
