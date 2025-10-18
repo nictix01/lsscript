@@ -248,6 +248,26 @@ ESPTab:CreateColorPicker({
    end
 })
 
+local MiscTab = Window:CreateTab("Misc", "moon")
+
+local ColorPicker = MiscTab:CreateColorPicker({
+    Name = "Couleur du Menu",
+    Color = Color3.fromRGB(0, 170, 255),
+    Flag = "MenuColor",
+
+    Callback = function(Value)
+        -- On change la couleur du menu en direct
+        Rayfield:ChangeColor("Main", Value)
+    end
+})
+
+MiscTab:CreateButton({
+    Name = "JOIN DISCORD",
+    Callback = function()
+        setclipboard("https://discord.gg/thcfr")
+    end
+})
+
 -- ✅ Notification
 Rayfield:Notify({
    Title = "THCrb Script Hub",
