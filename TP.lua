@@ -5,7 +5,6 @@ local LocalPlayer = Players.LocalPlayer
 -- ===================== MODULE TELEPORT =====================
 local Teleport = {}
 
--- Fonction pour obtenir tous les joueurs (sauf le joueur local)
 function Teleport.GetPlayers()
     local playerList = {}
     for _, player in pairs(Players:GetPlayers()) do
@@ -13,60 +12,94 @@ function Teleport.GetPlayers()
             table.insert(playerList, player.Name)
         end
     end
+    print("[TP] Joueurs trouvés:", table.concat(playerList, ", "))
     return playerList
 end
 
--- Fonction pour téléporter vers un joueur par son nom
 function Teleport.ToPlayer(playerName)
+    print("[TP] Tentative de téléportation vers:", playerName)
+    
+    if not playerName or playerName == "" then
+        warn("[TP] Nom de joueur vide")
+        return false
+    end
+    
     local targetPlayer = Players:FindFirstChild(playerName)
     
     if not targetPlayer then
-        warn("Joueur introuvable: " .. playerName)
+        warn("[TP] Joueur introuvable:", playerName)
         return false
     end
+    
+    print("[TP] Joueur trouvé:", targetPlayer.Name)
     
     local targetCharacter = targetPlayer.Character
     local localCharacter = LocalPlayer.Character
     
-    if not targetCharacter or not localCharacter then
-        warn("Personnage introuvable")
+    if not targetCharacter then
+        warn("[TP] Personnage cible introuvable")
+        return false
+    end
+    
+    if not localCharacter then
+        warn("[TP] Votre personnage est introuvable")
         return false
     end
     
     local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
     local localRoot = localCharacter:FindFirstChild("HumanoidRootPart")
     
-    if not targetRoot or not localRoot then
-        warn("HumanoidRootPart introuvable")
+    if not targetRoot then
+        warn("[TP] HumanoidRootPart de la cible introuvable")
         return false
     end
     
-    -- Téléportation
-    localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3) -- 3 studs derrière le joueur
-    return true
+    if not localRoot then
+        warn("[TP] Votre HumanoidRootPart introuvable")
+        return false
+    end
+    
+    local success, err = pcall(function()
+        localRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -3)
+    end)
+    
+    if success then
+        print("[TP] Téléportation réussie vers", targetPlayer.Name)
+        return true
+    else
+        warn("[TP] Erreur lors de la téléportation:", err)
+        return false
+    end
 end
 
--- Fonction pour téléporter vers des coordonnées spécifiques
 function Teleport.ToPosition(x, y, z)
     local localCharacter = LocalPlayer.Character
     
     if not localCharacter then
-        warn("Personnage introuvable")
+        warn("[TP] Personnage introuvable")
         return false
     end
     
     local localRoot = localCharacter:FindFirstChild("HumanoidRootPart")
     
     if not localRoot then
-        warn("HumanoidRootPart introuvable")
+        warn("[TP] HumanoidRootPart introuvable")
         return false
     end
     
-    localRoot.CFrame = CFrame.new(x, y, z)
-    return true
+    local success, err = pcall(function()
+        localRoot.CFrame = CFrame.new(x, y, z)
+    end)
+    
+    if success then
+        print("[TP] Téléportation réussie aux coordonnées:", x, y, z)
+        return true
+    else
+        warn("[TP] Erreur lors de la téléportation:", err)
+        return false
+    end
 end
 
--- Fonction pour obtenir la position d'un joueur
 function Teleport.GetPlayerPosition(playerName)
     local targetPlayer = Players:FindFirstChild(playerName)
     
@@ -87,15 +120,14 @@ function Teleport.GetPlayerPosition(playerName)
     return targetRoot.Position
 end
 
--- Événement quand un joueur rejoint (utile pour mettre à jour la liste)
 function Teleport.OnPlayerAdded(callback)
     Players.PlayerAdded:Connect(callback)
 end
 
--- Événement quand un joueur quitte (utile pour mettre à jour la liste)
 function Teleport.OnPlayerRemoving(callback)
     Players.PlayerRemoving:Connect(callback)
 end
 
--- ===================== RETOUR DU MODULE =====================
+print("[TP] Module Teleport chargé avec succès")
+
 return Teleport

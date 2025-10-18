@@ -2,11 +2,10 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Lib = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix01/lsscript/refs/heads/main/Fly.lua'))()
 local Teleport = loadstring(game:HttpGet('https://raw.githubusercontent.com/nictix01/lsscript/refs/heads/main/TP.lua'))()
 
--- Création de la fenêtre principale
 local Window = Rayfield:CreateWindow({
-    Name = "Fly Menu",
-    LoadingTitle = "Menu by Edaward_01",
-    LoadingSubtitle = "Edaward_01",
+    Name = "Menu by Edaward_01",
+    LoadingTitle = "Chargement...",
+    LoadingSubtitle = "by Edaward_01",
     ConfigurationSaving = {
         Enabled = true,
         FolderName = "AncienMenu",
@@ -17,27 +16,18 @@ local Window = Rayfield:CreateWindow({
         Invite = "https://discord.gg/thcfr",
         RememberJoins = true
     },
-    KeySystem = false,
-    KeySettings = {
-        Title = "Ancien Menu",
-        Subtitle = "Key System",
-        Note = "Contactez Edaward_01 pour obtenir une clé.",
-        FileName = "KeyFile",
-        SaveKey = true,
-        GrabKeyFromSite = false,
-        KeySiteUrl = ""
-    }
+    KeySystem = false
 })
 
-local FlyTab = Window:CreateTab("Fly", 'plane')
+-- ONGLET FLY
+local FlyTab = Window:CreateTab("Fly", 4483345998)
 
--- ❌ ERREUR 1 CORRIGÉE : Syntaxe du Toggle incorrecte (if/else en dehors de la fonction)
 FlyTab:CreateToggle({
     Name = "Activer le Fly",
     CurrentValue = false,
     Flag = "FlyToggle",
     Callback = function(Value)
-        if Value then  -- ✅ Le if doit être DANS la fonction Callback
+        if Value then
             Lib.Fly.On()
         else
             Lib.Fly.Off()
@@ -45,8 +35,7 @@ FlyTab:CreateToggle({
     end
 })
 
--- ❌ ERREUR 2 CORRIGÉE : Variable "Tab" au lieu de "FlyTab"
-local FlySpeedSlider = FlyTab:CreateSlider({  -- ✅ FlyTab au lieu de Tab
+FlyTab:CreateSlider({
     Name = "Fly Speed",
     Range = {10, 200},
     Increment = 5,
@@ -58,7 +47,9 @@ local FlySpeedSlider = FlyTab:CreateSlider({  -- ✅ FlyTab au lieu de Tab
     end,
 })
 
-local NoClipTab = Window:CreateTab("NoClip", 'ghost')
+-- ONGLET NOCLIP
+local NoClipTab = Window:CreateTab("NoClip", 4483345998)
+
 NoClipTab:CreateToggle({
     Name = "Activer le NoClip",
     CurrentValue = false,
@@ -72,62 +63,73 @@ NoClipTab:CreateToggle({
     end
 })
 
-local TeleportTab = Window:CreateTab("Téléportation", 'location')
-local PlayerDropdown = TpTab:CreateDropdown({
-    Name = "Sélectionner un joueur",
+-- ONGLET TELEPORTATION
+local TeleportTab = Window:CreateTab("Teleportation", 4483345998)
+
+local selectedPlayerName = nil
+
+local PlayerDropdown = TeleportTab:CreateDropdown({
+    Name = "Selectionner un joueur",
     Options = Teleport.GetPlayers(),
-    CurrentOption = "",
+    CurrentOption = {"Aucun"},
+    MultipleOptions = false,
     Flag = "PlayerDropdown",
     Callback = function(Option)
-        -- Option contient le nom du joueur sélectionné
-        print("Joueur sélectionné:", Option)
+        selectedPlayerName = Option
+        print("Joueur selectionne:", selectedPlayerName)
     end,
 })
 
-TpTab:CreateButton({
-    Name = "Téléporter au joueur",
+TeleportTab:CreateButton({
+    Name = "Teleporter au joueur",
     Callback = function()
-        local selectedPlayer = PlayerDropdown.CurrentOption
-        if selectedPlayer and selectedPlayer ~= "" then
-            local success = Teleport.ToPlayer(selectedPlayer)
+        if selectedPlayerName and selectedPlayerName ~= "" and selectedPlayerName ~= "Aucun" then
+            local success = Teleport.ToPlayer(selectedPlayerName)
             if success then
                 Rayfield:Notify({
-                    Title = "Téléportation",
-                    Content = "Téléporté à " .. selectedPlayer,
+                    Title = "Teleportation",
+                    Content = "Teleporte a " .. selectedPlayerName,
                     Duration = 3,
                     Image = 4483345998,
                 })
             else
                 Rayfield:Notify({
                     Title = "Erreur",
-                    Content = "Impossible de se téléporter",
+                    Content = "Impossible de se teleporter",
                     Duration = 3,
                     Image = 4483345998,
                 })
             end
+        else
+            Rayfield:Notify({
+                Title = "Erreur",
+                Content = "Veuillez selectionner un joueur",
+                Duration = 3,
+                Image = 4483345998,
+            })
         end
     end,
 })
 
-TpTab:CreateButton({
-    Name = "Rafraîchir la liste",
+TeleportTab:CreateButton({
+    Name = "Rafraichir la liste",
     Callback = function()
-        PlayerDropdown:Refresh(Teleport.GetPlayers())
+        local newPlayerList = Teleport.GetPlayers()
+        PlayerDropdown:Refresh(newPlayerList, true)
         Rayfield:Notify({
-            Title = "Liste mise à jour",
-            Content = "Liste des joueurs rafraîchie",
+            Title = "Liste mise a jour",
+            Content = #newPlayerList .. " joueurs trouves",
             Duration = 2,
             Image = 4483345998,
         })
     end,
 })
 
--- Mise à jour automatique quand un joueur rejoint/quitte
 Teleport.OnPlayerAdded(function(player)
-    task.wait(1) -- Attendre que le personnage spawn
-    PlayerDropdown:Refresh(Teleport.GetPlayers())
+    task.wait(1)
+    PlayerDropdown:Refresh(Teleport.GetPlayers(), true)
 end)
 
 Teleport.OnPlayerRemoving(function(player)
-    PlayerDropdown:Refresh(Teleport.GetPlayers())
+    PlayerDropdown:Refresh(Teleport.GetPlayers(), true)
 end)
